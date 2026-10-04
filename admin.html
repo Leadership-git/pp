@@ -1,0 +1,2584 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Administration - Boutique</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  font-family:Arial,sans-serif;
+  background:#f4f5f7;
+  color:#222;
+}
+
+button,
+input,
+textarea,
+select{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+  border:none;
+}
+
+
+/* =========================
+   LOGIN
+========================= */
+
+#loginPage{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+  background:linear-gradient(135deg,#111,#ff6600);
+}
+
+.loginBox{
+  width:100%;
+  max-width:420px;
+  background:white;
+  padding:30px;
+  border-radius:18px;
+  box-shadow:0 15px 50px rgba(0,0,0,.25);
+}
+
+.loginBox h1{
+  text-align:center;
+  margin-bottom:10px;
+}
+
+.loginBox p{
+  text-align:center;
+  color:#777;
+  margin-bottom:25px;
+}
+
+
+/* =========================
+   CHAMPS
+========================= */
+
+.field{
+  margin-bottom:16px;
+}
+
+.field label{
+  display:block;
+  margin-bottom:7px;
+  font-weight:bold;
+}
+
+.field input,
+.field textarea,
+.field select{
+  width:100%;
+  padding:13px;
+  border:1px solid #ddd;
+  border-radius:9px;
+  outline:none;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus{
+  border-color:#ff6600;
+}
+
+.field textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+
+/* =========================
+   BOUTONS
+========================= */
+
+.primary{
+  width:100%;
+  padding:14px;
+  background:#ff6600;
+  color:white;
+  border-radius:9px;
+  font-weight:bold;
+}
+
+.primary:hover{
+  background:#e85b00;
+}
+
+
+/* =========================
+   MESSAGES
+========================= */
+
+.message{
+  margin-top:15px;
+  padding:12px;
+  border-radius:8px;
+  display:none;
+}
+
+.error{
+  background:#ffe5e5;
+  color:#b00020;
+}
+
+.success{
+  background:#e3f8e8;
+  color:#14752c;
+}
+
+
+/* =========================
+   ADMIN
+========================= */
+
+#adminPage{
+  display:none;
+}
+
+.topbar{
+  background:#111;
+  color:white;
+  padding:15px 25px;
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  position:sticky;
+  top:0;
+
+  z-index:20;
+}
+
+.brand{
+  font-size:21px;
+  font-weight:bold;
+}
+
+.brand span{
+  color:#ff6600;
+}
+
+.logout{
+  background:white;
+  color:#111;
+  padding:9px 14px;
+  border-radius:7px;
+  font-weight:bold;
+}
+
+.container{
+  max-width:1250px;
+  margin:auto;
+  padding:25px;
+}
+
+
+/* =========================
+   STATS
+========================= */
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+  margin-bottom:25px;
+}
+
+.stat{
+  background:white;
+  border-radius:14px;
+  padding:20px;
+  box-shadow:0 3px 12px rgba(0,0,0,.06);
+}
+
+.stat small{
+  color:#777;
+}
+
+.stat strong{
+  display:block;
+  font-size:30px;
+  margin-top:8px;
+  color:#ff6600;
+}
+
+
+/* =========================
+   SECTIONS
+========================= */
+
+.section{
+  background:white;
+  padding:22px;
+  border-radius:14px;
+  margin-bottom:25px;
+  box-shadow:0 3px 12px rgba(0,0,0,.06);
+}
+
+.sectionHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:20px;
+}
+
+.sectionHeader h2{
+  font-size:21px;
+}
+
+.addBtn{
+  background:#ff6600;
+  color:white;
+  padding:11px 16px;
+  border-radius:8px;
+  font-weight:bold;
+}
+
+
+/* =========================
+   SEARCH
+========================= */
+
+.searchBox{
+  width:100%;
+  padding:12px;
+  border:1px solid #ddd;
+  border-radius:8px;
+  margin-bottom:15px;
+}
+
+
+/* =========================
+   TABLE PRODUITS
+========================= */
+
+.productsTable{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.productsTable th,
+.productsTable td{
+  padding:13px 10px;
+  border-bottom:1px solid #eee;
+  text-align:left;
+  vertical-align:middle;
+}
+
+.productsTable th{
+  background:#fafafa;
+}
+
+
+/* =========================
+   IMAGES
+========================= */
+
+.cover{
+  width:55px;
+  height:55px;
+
+  object-fit:cover;
+
+  border-radius:7px;
+
+  background:#eee;
+}
+
+.coverPreview{
+  width:180px;
+  height:180px;
+
+  object-fit:cover;
+
+  border-radius:12px;
+
+  display:none;
+
+  margin-top:12px;
+
+  border:1px solid #ddd;
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+.status{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.status.active{
+  background:#dff6e5;
+  color:#18752d;
+}
+
+.status.inactive{
+  background:#ffe3e3;
+  color:#b00020;
+}
+
+
+/* =========================
+   ACTIONS
+========================= */
+
+.actions{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+}
+
+.action{
+  padding:7px 10px;
+  border-radius:6px;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.edit{
+  background:#e8f0ff;
+  color:#174da6;
+}
+
+.toggle{
+  background:#fff0dc;
+  color:#a65300;
+}
+
+.delete{
+  background:#ffe3e3;
+  color:#b00020;
+}
+
+
+/* =========================
+   CATEGORIES
+========================= */
+
+.categoryList{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.categoryItem{
+  background:#f2f2f2;
+  padding:10px 13px;
+  border-radius:8px;
+
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.categoryDelete{
+  color:#b00020;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+
+/* =========================
+   MODAL
+========================= */
+
+.modal{
+  position:fixed;
+
+  inset:0;
+
+  background:rgba(0,0,0,.6);
+
+  display:none;
+
+  justify-content:center;
+  align-items:center;
+
+  padding:20px;
+
+  z-index:50;
+}
+
+.modalBox{
+  background:white;
+
+  width:100%;
+  max-width:600px;
+
+  max-height:90vh;
+
+  overflow:auto;
+
+  border-radius:15px;
+
+  padding:25px;
+}
+
+.modalHeader{
+  display:flex;
+  justify-content:space-between;
+
+  margin-bottom:20px;
+}
+
+.close{
+  font-size:25px;
+  background:none;
+}
+
+.formButtons{
+  display:flex;
+  gap:10px;
+
+  margin-top:20px;
+}
+
+.formButtons button{
+  flex:1;
+
+  padding:13px;
+
+  border-radius:8px;
+
+  font-weight:bold;
+}
+
+.cancel{
+  background:#eee;
+}
+
+.save{
+  background:#ff6600;
+  color:white;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:750px){
+
+  .container{
+    padding:15px;
+  }
+
+  .stats{
+    grid-template-columns:1fr;
+  }
+
+  .productsTable{
+    display:block;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+
+  .sectionHeader{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .topbar{
+    padding:13px 15px;
+  }
+
+  .brand{
+    font-size:17px;
+  }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     PAGE LOGIN
+===================================================== -->
+
+<div id="loginPage">
+
+  <div class="loginBox">
+
+    <h1>🔐 Administration</h1>
+
+    <p>
+      Accès réservé à l'administrateur
+    </p>
+
+
+    <div class="field">
+
+      <label>Email</label>
+
+      <input
+        id="email"
+        type="email"
+        placeholder="Votre Gmail"
+      >
+
+    </div>
+
+
+    <div class="field">
+
+      <label>Mot de passe</label>
+
+      <input
+        id="password"
+        type="password"
+        placeholder="Votre mot de passe"
+      >
+
+    </div>
+
+
+    <button
+      class="primary"
+      onclick="login()"
+    >
+      Se connecter
+    </button>
+
+
+    <div
+      id="loginMessage"
+      class="message"
+    ></div>
+
+  </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     PAGE ADMIN
+===================================================== -->
+
+<div id="adminPage">
+
+
+  <div class="topbar">
+
+    <div class="brand">
+
+      🛍️ <span>Boutique</span> Admin
+
+    </div>
+
+
+    <button
+      class="logout"
+      onclick="logout()"
+    >
+      Déconnexion
+    </button>
+
+  </div>
+
+
+
+  <main class="container">
+
+
+    <!-- STATS -->
+
+    <div class="stats">
+
+
+      <div class="stat">
+
+        <small>
+          Total produits
+        </small>
+
+        <strong id="totalProducts">
+          0
+        </strong>
+
+      </div>
+
+
+      <div class="stat">
+
+        <small>
+          Produits publiés
+        </small>
+
+        <strong id="activeProducts">
+          0
+        </strong>
+
+      </div>
+
+
+      <div class="stat">
+
+        <small>
+          Catégories
+        </small>
+
+        <strong id="totalCategories">
+          0
+        </strong>
+
+      </div>
+
+
+    </div>
+
+
+
+    <!-- PRODUITS -->
+
+    <section class="section">
+
+
+      <div class="sectionHeader">
+
+        <h2>
+          📦 Produits
+        </h2>
+
+
+        <button
+          class="addBtn"
+          onclick="openProductModal()"
+        >
+          + Ajouter un produit
+        </button>
+
+      </div>
+
+
+      <input
+        id="productSearch"
+        class="searchBox"
+        placeholder="🔎 Rechercher un produit..."
+        oninput="renderProducts()"
+      >
+
+
+      <div style="overflow-x:auto;">
+
+        <table class="productsTable">
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Image
+              </th>
+
+              <th>
+                Produit
+              </th>
+
+              <th>
+                Catégorie
+              </th>
+
+              <th>
+                Prix
+              </th>
+
+              <th>
+                Statut
+              </th>
+
+              <th>
+                Actions
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="productsBody"></tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- CATEGORIES -->
+
+    <section class="section">
+
+
+      <div class="sectionHeader">
+
+        <h2>
+          🏷️ Catégories
+        </h2>
+
+
+        <button
+          class="addBtn"
+          onclick="addCategory()"
+        >
+          + Ajouter
+        </button>
+
+      </div>
+
+
+      <div
+        id="categoryList"
+        class="categoryList"
+      ></div>
+
+
+    </section>
+
+
+  </main>
+
+</div>
+
+
+
+<!-- =====================================================
+     MODAL PRODUIT
+===================================================== -->
+
+<div
+  id="productModal"
+  class="modal"
+>
+
+  <div class="modalBox">
+
+
+    <div class="modalHeader">
+
+      <h2 id="modalTitle">
+        Ajouter un produit
+      </h2>
+
+
+      <button
+        class="close"
+        onclick="closeProductModal()"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+
+    <!-- NOM -->
+
+    <div class="field">
+
+      <label>
+        Nom du produit
+      </label>
+
+      <input
+        id="productName"
+        type="text"
+        placeholder="Ex : Guide de révision Terminale"
+      >
+
+    </div>
+
+
+
+    <!-- PRIX -->
+
+    <div class="field">
+
+      <label>
+        Prix (FCFA)
+      </label>
+
+      <input
+        id="productPrice"
+        type="number"
+        min="0"
+        placeholder="Ex : 1500"
+      >
+
+    </div>
+
+
+
+    <!-- CATEGORIE -->
+
+    <div class="field">
+
+      <label>
+        Catégorie
+      </label>
+
+      <select id="productCategory">
+
+        <option value="">
+          Sans catégorie
+        </option>
+
+      </select>
+
+    </div>
+
+
+
+    <!-- DESCRIPTION -->
+
+    <div class="field">
+
+      <label>
+        Description
+      </label>
+
+      <textarea
+        id="productDescription"
+        placeholder="Description du produit..."
+      ></textarea>
+
+    </div>
+
+
+
+    <!-- IMAGE -->
+
+    <div class="field">
+
+      <label>
+        Image de couverture
+      </label>
+
+
+      <input
+        id="productCoverFile"
+        type="file"
+        accept="image/*"
+        onchange="previewCover(event)"
+      >
+
+
+      <img
+        id="coverPreview"
+        class="coverPreview"
+        alt="Aperçu"
+      >
+
+
+      <small
+        id="uploadInfo"
+        style="
+          display:block;
+          margin-top:8px;
+          color:#777;
+        "
+      >
+        Choisis une image depuis ta galerie.
+      </small>
+
+    </div>
+
+
+
+    <!-- STATUT -->
+
+    <div class="field">
+
+      <label>
+        Statut
+      </label>
+
+      <select id="productStatus">
+
+        <option value="active">
+          Publié
+        </option>
+
+        <option value="inactive">
+          Masqué
+        </option>
+
+      </select>
+
+    </div>
+
+
+
+    <!-- BOUTONS -->
+
+    <div class="formButtons">
+
+      <button
+        class="cancel"
+        onclick="closeProductModal()"
+      >
+        Annuler
+      </button>
+
+
+      <button
+        class="save"
+        id="saveProductButton"
+        onclick="saveProduct()"
+      >
+        Enregistrer
+      </button>
+
+    </div>
+
+
+    <div
+      id="productMessage"
+      class="message"
+    ></div>
+
+
+  </div>
+
+</div>
+
+
+
+<script>
+
+/* =====================================================
+   CONFIGURATION SUPABASE
+===================================================== */
+
+const SUPABASE_URL =
+"https://zwqjafkzjvqkezuhkmvp.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+"sb_publishable_C7BRUdjO6B1VKlGgMEfYOg_lsJ5bQJ7";
+
+
+const supabaseClient =
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+
+
+/* =====================================================
+   CONFIGURATION STORAGE
+===================================================== */
+
+const COVER_BUCKET =
+"product-covers";
+
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+let products = [];
+
+let categories = [];
+
+let editingProductId = null;
+
+let currentUser = null;
+
+
+/* =====================================================
+   UTILITAIRES
+===================================================== */
+
+function showMessage(
+  elementId,
+  text,
+  type
+){
+
+  const element =
+    document.getElementById(elementId);
+
+  element.textContent = text;
+
+  element.className =
+    "message " + type;
+
+  element.style.display =
+    "block";
+
+}
+
+
+function hideMessage(elementId){
+
+  const element =
+    document.getElementById(elementId);
+
+  element.style.display =
+    "none";
+
+}
+
+
+function escapeHTML(value){
+
+  if(
+    value === null ||
+    value === undefined
+  ){
+
+    return "";
+
+  }
+
+
+  return String(value)
+
+    .replace(/&/g,"&amp;")
+
+    .replace(/</g,"&lt;")
+
+    .replace(/>/g,"&gt;")
+
+    .replace(/"/g,"&quot;")
+
+    .replace(/'/g,"&#039;");
+
+}
+
+
+/* =====================================================
+   CONNEXION
+===================================================== */
+
+async function login(){
+
+  hideMessage("loginMessage");
+
+
+  const email =
+    document
+      .getElementById("email")
+      .value
+      .trim();
+
+
+  const password =
+    document
+      .getElementById("password")
+      .value;
+
+
+  if(
+    !email ||
+    !password
+  ){
+
+    showMessage(
+      "loginMessage",
+      "Veuillez remplir tous les champs.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.auth.signInWithPassword({
+
+      email:email,
+
+      password:password
+
+    });
+
+
+  if(error){
+
+    showMessage(
+      "loginMessage",
+      "Connexion impossible : " +
+      error.message,
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  await checkAdmin(
+    data.user
+  );
+
+}
+
+
+/* =====================================================
+   VERIFICATION ADMIN
+===================================================== */
+
+async function checkAdmin(user){
+
+  currentUser =
+    user;
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+
+      .from("admin_profiles")
+
+      .select("*")
+
+      .eq(
+        "user_id",
+        user.id
+      )
+
+      .maybeSingle();
+
+
+  if(error){
+
+    await supabaseClient
+      .auth
+      .signOut();
+
+
+    showMessage(
+      "loginMessage",
+      "Erreur de vérification administrateur : " +
+      error.message,
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(!data){
+
+    await supabaseClient
+      .auth
+      .signOut();
+
+
+    showMessage(
+      "loginMessage",
+      "Ce compte n'est pas autorisé comme administrateur.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  document
+    .getElementById("loginPage")
+    .style.display = "none";
+
+
+  document
+    .getElementById("adminPage")
+    .style.display = "block";
+
+
+  await loadEverything();
+
+}
+
+
+/* =====================================================
+   SESSION EXISTANTE
+===================================================== */
+
+async function checkSession(){
+
+  const {
+    data: {
+      session
+    }
+  } =
+    await supabaseClient
+      .auth
+      .getSession();
+
+
+  if(session){
+
+    await checkAdmin(
+      session.user
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   DECONNEXION
+===================================================== */
+
+async function logout(){
+
+  await supabaseClient
+    .auth
+    .signOut();
+
+
+  location.reload();
+
+}
+
+
+/* =====================================================
+   CHARGEMENT GLOBAL
+===================================================== */
+
+async function loadEverything(){
+
+  await loadCategories();
+
+  await loadProducts();
+
+}
+
+
+/* =====================================================
+   CATEGORIES
+===================================================== */
+
+async function loadCategories(){
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+
+      .from("categories")
+
+      .select("*")
+
+      .order(
+        "name",
+        {
+          ascending:true
+        }
+      );
+
+
+  if(error){
+
+    console.error(error);
+
+    return;
+
+  }
+
+
+  categories =
+    data || [];
+
+
+  document
+    .getElementById("totalCategories")
+    .textContent =
+    categories.length;
+
+
+  renderCategories();
+
+  fillCategorySelect();
+
+}
+
+
+/* =====================================================
+   AFFICHER CATEGORIES
+===================================================== */
+
+function renderCategories(){
+
+  const container =
+    document
+      .getElementById("categoryList");
+
+
+  if(categories.length === 0){
+
+    container.innerHTML =
+      "<p>Aucune catégorie.</p>";
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+
+    categories
+      .map(category => `
+
+        <div class="categoryItem">
+
+          <span>
+            ${escapeHTML(category.name)}
+          </span>
+
+          <span
+            class="categoryDelete"
+            onclick="deleteCategory(${category.id})"
+          >
+            ×
+          </span>
+
+        </div>
+
+      `)
+      .join("");
+
+}
+
+
+/* =====================================================
+   SELECT CATEGORIES
+===================================================== */
+
+function fillCategorySelect(){
+
+  const select =
+    document
+      .getElementById("productCategory");
+
+
+  select.innerHTML =
+    `<option value="">
+      Sans catégorie
+    </option>`;
+
+
+  categories.forEach(category => {
+
+    select.innerHTML += `
+
+      <option value="${category.id}">
+
+        ${escapeHTML(category.name)}
+
+      </option>
+
+    `;
+
+  });
+
+}
+
+
+/* =====================================================
+   AJOUT CATEGORIE
+===================================================== */
+
+async function addCategory(){
+
+  const name =
+    prompt(
+      "Nom de la nouvelle catégorie :"
+    );
+
+
+  if(
+    !name ||
+    !name.trim()
+  ){
+
+    return;
+
+  }
+
+
+  const {
+    error
+  } =
+    await supabaseClient
+
+      .from("categories")
+
+      .insert({
+        name:name.trim()
+      });
+
+
+  if(error){
+
+    alert(
+      "Impossible d'ajouter la catégorie : " +
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  await loadCategories();
+
+}
+
+
+/* =====================================================
+   SUPPRESSION CATEGORIE
+===================================================== */
+
+async function deleteCategory(id){
+
+  const category =
+    categories.find(
+      c => c.id === id
+    );
+
+
+  if(!category){
+
+    return;
+
+  }
+
+
+  const confirmed =
+    confirm(
+      `Supprimer la catégorie "${category.name}" ?`
+    );
+
+
+  if(!confirmed){
+
+    return;
+
+  }
+
+
+  const {
+    error
+  } =
+    await supabaseClient
+
+      .from("categories")
+
+      .delete()
+
+      .eq(
+        "id",
+        id
+      );
+
+
+  if(error){
+
+    alert(
+      "Impossible de supprimer : " +
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  await loadEverything();
+
+}
+
+
+/* =====================================================
+   PRODUITS
+===================================================== */
+
+async function loadProducts(){
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+
+      .from("products")
+
+      .select(`
+        *,
+        categories (
+          name
+        )
+      `)
+
+      .order(
+        "created_at",
+        {
+          ascending:false
+        }
+      );
+
+
+  if(error){
+
+    console.error(error);
+
+    alert(
+      "Impossible de charger les produits : " +
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  products =
+    data || [];
+
+
+  updateStats();
+
+  renderProducts();
+
+}
+
+
+/* =====================================================
+   STATS
+===================================================== */
+
+function updateStats(){
+
+  document
+    .getElementById("totalProducts")
+    .textContent =
+    products.length;
+
+
+  document
+    .getElementById("activeProducts")
+    .textContent =
+
+    products.filter(
+      p => p.status === "active"
+    ).length;
+
+}
+
+
+/* =====================================================
+   AFFICHAGE PRODUITS
+===================================================== */
+
+function renderProducts(){
+
+  const body =
+    document
+      .getElementById("productsBody");
+
+
+  const search =
+    document
+      .getElementById("productSearch")
+      .value
+      .toLowerCase()
+      .trim();
+
+
+  const filtered =
+    products.filter(product => {
+
+      const category =
+        product.categories?.name || "";
+
+
+      return (
+
+        product.name
+          .toLowerCase()
+          .includes(search)
+
+        ||
+
+        (product.description || "")
+          .toLowerCase()
+          .includes(search)
+
+        ||
+
+        category
+          .toLowerCase()
+          .includes(search)
+
+      );
+
+    });
+
+
+  if(filtered.length === 0){
+
+    body.innerHTML = `
+
+      <tr>
+
+        <td colspan="6">
+
+          Aucun produit trouvé.
+
+        </td>
+
+      </tr>
+
+    `;
+
+    return;
+
+  }
+
+
+  body.innerHTML =
+
+    filtered
+      .map(product => `
+
+        <tr>
+
+          <td>
+
+            ${
+              product.cover
+
+              ?
+
+              `<img
+                src="${escapeHTML(product.cover)}"
+                class="cover"
+                alt=""
+              >`
+
+              :
+
+              `<div class="cover"></div>`
+            }
+
+          </td>
+
+
+          <td>
+
+            <strong>
+
+              ${escapeHTML(
+                product.name
+              )}
+
+            </strong>
+
+          </td>
+
+
+          <td>
+
+            ${escapeHTML(
+              product.categories?.name ||
+              "Sans catégorie"
+            )}
+
+          </td>
+
+
+          <td>
+
+            ${Number(
+              product.price
+            ).toLocaleString("fr-FR")}
+
+            FCFA
+
+          </td>
+
+
+          <td>
+
+            <span
+              class="status ${
+                product.status === "active"
+                  ? "active"
+                  : "inactive"
+              }"
+            >
+
+              ${
+                product.status === "active"
+                  ? "Publié"
+                  : "Masqué"
+              }
+
+            </span>
+
+          </td>
+
+
+          <td>
+
+            <div class="actions">
+
+
+              <button
+                class="action edit"
+                onclick="editProduct(${product.id})"
+              >
+
+                Modifier
+
+              </button>
+
+
+              <button
+                class="action toggle"
+                onclick="toggleProduct(${product.id})"
+              >
+
+                ${
+                  product.status === "active"
+                    ? "Masquer"
+                    : "Publier"
+                }
+
+              </button>
+
+
+              <button
+                class="action delete"
+                onclick="deleteProduct(${product.id})"
+              >
+
+                Supprimer
+
+              </button>
+
+
+            </div>
+
+          </td>
+
+        </tr>
+
+      `)
+      .join("");
+
+}
+
+
+/* =====================================================
+   APERCU IMAGE
+===================================================== */
+
+function previewCover(event){
+
+  const file =
+    event.target.files[0];
+
+
+  const preview =
+    document
+      .getElementById("coverPreview");
+
+
+  const info =
+    document
+      .getElementById("uploadInfo");
+
+
+  if(!file){
+
+    preview.style.display =
+      "none";
+
+    info.textContent =
+      "Choisis une image depuis ta galerie.";
+
+    return;
+
+  }
+
+
+  if(
+    !file.type.startsWith("image/")
+  ){
+
+    alert(
+      "Veuillez sélectionner une image."
+    );
+
+    event.target.value = "";
+
+    return;
+
+  }
+
+
+  const maxSize =
+    5 * 1024 * 1024;
+
+
+  if(file.size > maxSize){
+
+    alert(
+      "L'image est trop grande. Maximum : 5 Mo."
+    );
+
+    event.target.value = "";
+
+    return;
+
+  }
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload =
+    function(e){
+
+      preview.src =
+        e.target.result;
+
+      preview.style.display =
+        "block";
+
+    };
+
+
+  reader.readAsDataURL(file);
+
+
+  info.textContent =
+    file.name +
+    " • " +
+    (
+      file.size / 1024 / 1024
+    ).toFixed(2) +
+    " Mo";
+
+}
+
+
+/* =====================================================
+   OUVRIR MODAL
+===================================================== */
+
+function openProductModal(product = null){
+
+  editingProductId =
+    product
+      ? product.id
+      : null;
+
+
+  document
+    .getElementById("modalTitle")
+    .textContent =
+
+    product
+      ? "Modifier le produit"
+      : "Ajouter un produit";
+
+
+  document
+    .getElementById("productName")
+    .value =
+    product?.name || "";
+
+
+  document
+    .getElementById("productPrice")
+    .value =
+    product?.price ?? "";
+
+
+  document
+    .getElementById("productDescription")
+    .value =
+    product?.description || "";
+
+
+  document
+    .getElementById("productCategory")
+    .value =
+    product?.category_id || "";
+
+
+  document
+    .getElementById("productStatus")
+    .value =
+    product?.status || "active";
+
+
+  document
+    .getElementById("productCoverFile")
+    .value = "";
+
+
+  const preview =
+    document
+      .getElementById("coverPreview");
+
+
+  if(product?.cover){
+
+    preview.src =
+      product.cover;
+
+    preview.style.display =
+      "block";
+
+    document
+      .getElementById("uploadInfo")
+      .textContent =
+      "Image actuelle. Choisis une nouvelle image pour la remplacer.";
+
+  }else{
+
+    preview.src =
+      "";
+
+    preview.style.display =
+      "none";
+
+    document
+      .getElementById("uploadInfo")
+      .textContent =
+      "Choisis une image depuis ta galerie.";
+
+  }
+
+
+  hideMessage(
+    "productMessage"
+  );
+
+
+  document
+    .getElementById("productModal")
+    .style.display =
+    "flex";
+
+}
+
+
+/* =====================================================
+   FERMER MODAL
+===================================================== */
+
+function closeProductModal(){
+
+  document
+    .getElementById("productModal")
+    .style.display =
+    "none";
+
+}
+
+
+/* =====================================================
+   MODIFIER PRODUIT
+===================================================== */
+
+function editProduct(id){
+
+  const product =
+    products.find(
+      p => p.id === id
+    );
+
+
+  if(product){
+
+    openProductModal(
+      product
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   UPLOAD IMAGE
+===================================================== */
+
+async function uploadCover(file){
+
+  if(!file){
+
+    return null;
+
+  }
+
+
+  const extension =
+    file.name
+      .split(".")
+      .pop()
+      .toLowerCase();
+
+
+  const uniqueName =
+
+    Date.now() +
+    "_" +
+    Math.random()
+      .toString(36)
+      .substring(2,10) +
+    "." +
+    extension;
+
+
+  const filePath =
+    "products/" +
+    uniqueName;
+
+
+  const {
+    error
+  } =
+    await supabaseClient
+
+      .storage
+
+      .from(COVER_BUCKET)
+
+      .upload(
+        filePath,
+        file,
+        {
+          cacheControl:"3600",
+          upsert:false,
+          contentType:file.type
+        }
+      );
+
+
+  if(error){
+
+    throw new Error(
+      "Erreur upload image : " +
+      error.message
+    );
+
+  }
+
+
+  const {
+    data
+  } =
+    supabaseClient
+
+      .storage
+
+      .from(COVER_BUCKET)
+
+      .getPublicUrl(
+        filePath
+      );
+
+
+  return data.publicUrl;
+
+}
+
+
+/* =====================================================
+   ENREGISTRER PRODUIT
+===================================================== */
+
+async function saveProduct(){
+
+  hideMessage(
+    "productMessage"
+  );
+
+
+  const button =
+    document
+      .getElementById(
+        "saveProductButton"
+      );
+
+
+  const name =
+    document
+      .getElementById("productName")
+      .value
+      .trim();
+
+
+  const price =
+    Number(
+      document
+        .getElementById("productPrice")
+        .value
+    );
+
+
+  const description =
+    document
+      .getElementById("productDescription")
+      .value
+      .trim();
+
+
+  const categoryValue =
+    document
+      .getElementById("productCategory")
+      .value;
+
+
+  const status =
+    document
+      .getElementById("productStatus")
+      .value;
+
+
+  const file =
+    document
+      .getElementById("productCoverFile")
+      .files[0];
+
+
+  if(!name){
+
+    showMessage(
+      "productMessage",
+      "Le nom du produit est obligatoire.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(
+    !Number.isFinite(price) ||
+    price < 0
+  ){
+
+    showMessage(
+      "productMessage",
+      "Le prix est invalide.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(file){
+
+    if(
+      !file.type.startsWith("image/")
+    ){
+
+      showMessage(
+        "productMessage",
+        "Le fichier sélectionné n'est pas une image.",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if(
+      file.size >
+      5 * 1024 * 1024
+    ){
+
+      showMessage(
+        "productMessage",
+        "L'image dépasse 5 Mo.",
+        "error"
+      );
+
+      return;
+
+    }
+
+  }
+
+
+  try{
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "Enregistrement...";
+
+
+    let coverUrl =
+      null;
+
+
+    /*
+      Si une nouvelle image
+      est sélectionnée,
+      on l'envoie vers Storage.
+    */
+
+    if(file){
+
+      showMessage(
+        "productMessage",
+        "📤 Envoi de l'image...",
+        "success"
+      );
+
+
+      coverUrl =
+        await uploadCover(
+          file
+        );
+
+    }
+
+
+    /*
+      Pour une modification,
+      si aucune nouvelle image
+      n'est sélectionnée,
+      on garde l'ancienne.
+    */
+
+    if(
+      editingProductId &&
+      !file
+    ){
+
+      const existingProduct =
+        products.find(
+          p => p.id === editingProductId
+        );
+
+
+      coverUrl =
+        existingProduct?.cover ||
+        null;
+
+    }
+
+
+    const productData = {
+
+      name:name,
+
+      price:price,
+
+      description:
+        description || null,
+
+      cover:
+        coverUrl,
+
+      category_id:
+        categoryValue
+          ? Number(categoryValue)
+          : null,
+
+      status:status
+
+    };
+
+
+    let result;
+
+
+    if(editingProductId){
+
+      result =
+        await supabaseClient
+
+          .from("products")
+
+          .update(
+            productData
+          )
+
+          .eq(
+            "id",
+            editingProductId
+          );
+
+    }else{
+
+      result =
+        await supabaseClient
+
+          .from("products")
+
+          .insert(
+            productData
+          );
+
+    }
+
+
+    if(result.error){
+
+      throw new Error(
+        result.error.message
+      );
+
+    }
+
+
+    showMessage(
+      "productMessage",
+      editingProductId
+        ? "✅ Produit modifié avec succès."
+        : "✅ Produit ajouté avec succès.",
+      "success"
+    );
+
+
+    await loadProducts();
+
+
+    setTimeout(
+      () => {
+
+        closeProductModal();
+
+      },
+      800
+    );
+
+
+  }catch(error){
+
+    console.error(error);
+
+
+    showMessage(
+      "productMessage",
+      error.message,
+      "error"
+    );
+
+
+  }finally{
+
+    button.disabled =
+      false;
+
+    button.textContent =
+      "Enregistrer";
+
+  }
+
+}
+
+
+/* =====================================================
+   PUBLIER / MASQUER
+===================================================== */
+
+async function toggleProduct(id){
+
+  const product =
+    products.find(
+      p => p.id === id
+    );
+
+
+  if(!product){
+
+    return;
+
+  }
+
+
+  const newStatus =
+    product.status === "active"
+      ? "inactive"
+      : "active";
+
+
+  const {
+    error
+  } =
+    await supabaseClient
+
+      .from("products")
+
+      .update({
+        status:newStatus
+      })
+
+      .eq(
+        "id",
+        id
+      );
+
+
+  if(error){
+
+    alert(
+      "Impossible de modifier le statut : " +
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  await loadProducts();
+
+}
+
+
+/* =====================================================
+   SUPPRESSION PRODUIT
+===================================================== */
+
+async function deleteProduct(id){
+
+  const product =
+    products.find(
+      p => p.id === id
+    );
+
+
+  if(!product){
+
+    return;
+
+  }
+
+
+  const confirmed =
+    confirm(
+      `Supprimer définitivement "${product.name}" ?`
+    );
+
+
+  if(!confirmed){
+
+    return;
+
+  }
+
+
+  const {
+    error
+  } =
+    await supabaseClient
+
+      .from("products")
+
+      .delete()
+
+      .eq(
+        "id",
+        id
+      );
+
+
+  if(error){
+
+    alert(
+      "Impossible de supprimer le produit : " +
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  await loadProducts();
+
+}
+
+
+/* =====================================================
+   FERMETURE MODAL
+===================================================== */
+
+document
+  .getElementById("productModal")
+  .addEventListener(
+    "click",
+    function(event){
+
+      if(
+        event.target === this
+      ){
+
+        closeProductModal();
+
+      }
+
+    }
+  );
+
+
+/* =====================================================
+   DEMARRAGE
+===================================================== */
+
+checkSession();
+
+</script>
+
+</body>
+</html>
